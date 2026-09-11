@@ -110,7 +110,6 @@ The scripts do not define argparse command-line parameters; paths and date range
 ## Information to be confirmed
 
 - Public dataset URL.
-- GitHub account name replacing `<USER>` in the code link.
 - Production spatial resolution, CRS, scale factor, and NoData value from the companion `src.config` and production metadata.
 - Public paper DOI or URL.
 - Repository companion `src/` package location required to run the five scripts.
