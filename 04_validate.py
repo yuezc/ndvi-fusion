@@ -2,15 +2,15 @@
 04_validate.py
 ==============
 
-在独立验证期 2011-2013 评估融合 NDVI 与原 MODIS NDVI 的一致性。
-计算:
-* 全域汇总指标(R²、RMSE、MAE、Bias、Pearson r)
-* 像素级指标空间分布
-* 区域月均时间序列(GIMMS、MODIS、Fused)
-* 残差直方图
-* 训练期诊断(便于和验证对比)
+ 2011-2013  NDVI  MODIS NDVI 。
+:
+* (R²、RMSE、MAE、Bias、Pearson r)
+* 
+* (GIMMS、MODIS、Fused)
+* 
+* ()
 
-输出:
+:
 * output/validation/global_metrics.json
 * output/validation/pixel_metrics.npz
 * output/validation/regional_ts.npz
@@ -38,7 +38,7 @@ def main():
     fused_train = np.load(C.HARMONIZED_DIR / "fused_train_2001_2010.npy")
     mask = np.load(C.PROCESSED_DIR / "valid_mask.npy")
 
-    # 取参考 (MODIS) 在验证期的切片
+    #  (MODIS) 
     modis_val = io_utils.slice_time(modis, C.MODIS_START, C.VAL_START, C.VAL_END)
     avhrr_val = io_utils.slice_time(avhrr, C.AVHRR_START, C.VAL_START, C.VAL_END)
     modis_train = io_utils.slice_time(modis, C.MODIS_START, C.TRAIN_START, C.TRAIN_END)
@@ -46,7 +46,7 @@ def main():
 
     print(f"shapes -> fused_val {fused_val.shape}, modis_val {modis_val.shape}")
 
-    # 仅在共同有效像素内评估
+    # 
     fv = np.where(mask[None], fused_val, np.nan)
     mv = np.where(mask[None], modis_val, np.nan)
     av = np.where(mask[None], avhrr_val, np.nan)
@@ -54,10 +54,10 @@ def main():
     mt = np.where(mask[None], modis_train, np.nan)
     at = np.where(mask[None], avhrr_train, np.nan)
 
-    # ---- 全域指标 ----
+    # ----  ----
     print("\n>> global metrics on validation period")
     g_val_fused = V.global_metrics(fv, mv)
-    g_val_avhrr = V.global_metrics(av, mv)        # 未校正基线
+    g_val_avhrr = V.global_metrics(av, mv)        # 
     g_train_fused = V.global_metrics(ft, mt)
     print(f"  fused vs MODIS  R²={g_val_fused['R2']:.3f}, "
           f"RMSE={g_val_fused['RMSE']:.4f}, "
@@ -75,24 +75,24 @@ def main():
     with open(C.VALIDATION_DIR / "global_metrics.json", "w") as f:
         json.dump(metrics_summary, f, indent=2, default=float)
 
-    # ---- 像素级指标空间分布 ----
+    # ----  ----
     print("\n>> pixel-wise metrics maps")
     pix = V.pixel_metrics(fv, mv)
     np.savez_compressed(C.VALIDATION_DIR / "pixel_metrics.npz", **pix)
 
-    # ---- 区域月均时间序列 ----
+    # ----  ----
     print("\n>> regional monthly series")
     ts = dict(
         avhrr_full = V.regional_timeseries(avhrr, mask),
         modis_full = V.regional_timeseries(modis, mask),
     )
-    # fused full = 重建 1982-2000 + MODIS 2001-2025
+    # fused full =  1982-2000 + MODIS 2001-2025
     fused_full, _ = io_utils.read_stack(C.HARMONIZED_DIR / "fused_1982_2025.tif")
     ts["fused_full"] = V.regional_timeseries(fused_full, mask)
     np.savez_compressed(C.VALIDATION_DIR / "regional_ts.npz", **ts)
 
-    # ---- 验证期距平轨迹(代表像素) ----
-    # 选取若干像素:中位 NDVI、高 NDVI、低 NDVI
+    # ---- () ----
+    # : NDVI、 NDVI、 NDVI
     print("\n>> select 3 representative pixels for anomaly trajectories")
     mean_ndvi = np.nanmean(modis_train, axis=0)         # (H, W)
     mean_ndvi_in_mask = np.where(mask, mean_ndvi, np.nan)
@@ -100,7 +100,7 @@ def main():
     sel_idx = []
     for p in pcts:
         d = np.abs(mean_ndvi_in_mask - p)
-        # 选择最接近的有效像素
+        # 
         flat = np.argmin(np.where(np.isfinite(d), d, np.inf))
         i, j = np.unravel_index(flat, d.shape)
         sel_idx.append((int(i), int(j)))
@@ -124,7 +124,7 @@ def main():
     )
     np.savez_compressed(C.VALIDATION_DIR / "anomaly_trajectories.npz", **pix_data)
 
-    # ---- 不同 NDVI 量级类别(代理植被类型) ----
+    # ----  NDVI () ----
     print("\n>> metrics stratified by mean-NDVI class (proxy for vegetation type)")
     classes = np.full(mask.shape, 0, dtype=np.int32)
     classes[(mean_ndvi_in_mask < 0.15)] = 1                                     # bare/sparse
