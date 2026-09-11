@@ -1,5 +1,5 @@
 # Central Asia 44-Year AVHRR–MODIS NDVI Fusion Dataset (1982–2025)
-# 中亚44年AVHRR–MODIS NDVI时空融合数据集
+# 44AVHRR–MODIS NDVI
 
 [![Code: MIT](https://img.shields.io/badge/Code-MIT-green.svg)](LICENSE) [![Data: CC BY 4.0](https://img.shields.io/badge/Data-CC%20BY%204.0-blue.svg)](https://creativecommons.org/licenses/by/4.0/) [![Paper](https://img.shields.io/badge/Paper-available-lightgrey.svg)](#)
 
